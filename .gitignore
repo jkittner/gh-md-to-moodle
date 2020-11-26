@@ -1,0 +1,10 @@
+*.egg-info
+.coverage
+.mypy_cache
+.pytest_cache
+.scratch
+.tox
+.vscode
+__pycache__
+htmlcov
+venv

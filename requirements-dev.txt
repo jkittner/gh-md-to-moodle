@@ -1,0 +1,6 @@
+gh-md-to-html>=1.5.11
+importlib-metadata;python_version<"3.8"
+importlib-resources;python_version<"3.8"
+pytest>=6.1.1
+pytest-cov>=2.10.0
+tox>=3.20.1
