@@ -1,4 +1,5 @@
 [![build](https://github.com/theendlessriver13/gh-md-to-moodle/workflows/build/badge.svg)](https://github.com/theendlessriver13/gh-md-to-moodle/actions?query=workflow%3Abuild)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/theendlessriver13/gh-md-to-moodle/master.svg)](https://results.pre-commit.ci/latest/github/theendlessriver13/gh-md-to-moodle/master)
 [![codecov](https://codecov.io/gh/theendlessriver13/gh-md-to-moodle/branch/master/graph/badge.svg)](https://codecov.io/gh/theendlessriver13/gh-md-to-moodle)
 # gh-md-to-moodle
 
