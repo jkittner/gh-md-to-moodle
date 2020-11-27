@@ -52,7 +52,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         with open(raw_html) as f:
             html_str = f.read()
-    add_style_js = importlib_resources.read_text('resources', 'add_style.js')
+    add_style_js = importlib_resources.read_text(
+        'gh_md_to_moodle.resources', 'add_style.js',
+    )
     contents = (
         f'<script>{add_style_js}</script>'
         f'<div class="code-container">{html_str}</div>'
