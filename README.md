@@ -8,7 +8,7 @@ A tool to convert markdown to a `html` in GitHub style markdown.
 ## Installation
 
 ```console
-pip install git+https://github.com/theendlessriver13/gh-md-to-moodle.git@1.0.0
+pip install git+https://github.com/theendlessriver13/gh-md-to-moodle.git@1.0.1
 ```
 
 ## Usage
