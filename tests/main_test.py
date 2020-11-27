@@ -2,8 +2,8 @@ import os
 
 import pytest
 
-from gh_md_to_moodle.gh_md_to_moodle import _remove_newline_from_code
-from gh_md_to_moodle.gh_md_to_moodle import main
+from gh_md_to_moodle.main import _remove_newline_from_code
+from gh_md_to_moodle.main import main
 
 
 @pytest.fixture()
