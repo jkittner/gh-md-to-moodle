@@ -270,3 +270,20 @@ def test_rate_limit_exceeded(tmpdir, md_dummy):
             with pytest.raises(Exception) as exc:
                 main(args)
         assert exc.value.args[0] == 'API limit exceeded. Wait a few minutes'
+
+
+def test_wrong_css_is_removed(tmpdir, md_dummy):
+    test_str_xml = "<?xml version='1.0' encoding='UTF-8'?>"
+    test_str_style = 'github-css.css" rel="stylesheet"/>'
+    test_str_charset = '<meta charset="utf-8" content="text/html"/>'
+
+    with tmpdir.as_cwd():
+        md_dummy('# test')
+        args = ['testing.md', 'test.html']
+        main(args)
+
+        with open('test.html') as f:
+            contents = f.read()
+        assert test_str_xml not in contents
+        assert test_str_style not in contents
+        assert test_str_charset not in contents

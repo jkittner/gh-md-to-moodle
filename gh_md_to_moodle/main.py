@@ -51,7 +51,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             re.sub(r'\.md$', '.html', os.path.basename(args.origin)),
         )
         with open(raw_html) as f:
-            html_str = f.read()
+            html = f.readlines()
+        html_str = ''.join(html[3:])
     add_style_js = importlib_resources.read_text(
         'gh_md_to_moodle.resources', 'add_style.js',
     )
