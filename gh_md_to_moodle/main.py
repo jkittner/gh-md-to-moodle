@@ -60,9 +60,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         f'<div class="code-container">{html_str}</div>'
     )
     soup = BeautifulSoup(contents, 'html.parser')
+    if 'API rate limit exceeded' in soup:
+        raise Exception('API limit exceeded. Wait a few minutes')
+
+    # find img urls in markdown file
+    with open(args.origin) as md:
+        md_contents = md.read()
+    MD_IMG = re.compile(r'!\[\w+?\]\(([a-zA-Z:\/\.0-9]+)\)')
+    img_urls = MD_IMG.findall(md_contents)
+
+    # fin img tags in html
+    imgs = soup.find_all('img')
+    old_urls = [i['src'] for i in imgs]
+
+    # check both are matched correctly
+    assert len(old_urls) == len(img_urls)
+
+    # call code formatter
     pretty_html = soup.prettify()
     # remove newlines form code tag
     pretty_html = _remove_newline_from_code(pretty_html)
+    for img_url, old_url in zip(img_urls, old_urls):
+        pretty_html = pretty_html.replace(old_url, img_url)
+
     with open(args.destination, 'w') as f:
         f.write(pretty_html)
     return 0

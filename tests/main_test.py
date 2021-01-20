@@ -1,7 +1,9 @@
 import os
+from unittest import mock
 
 import pytest
 
+import gh_md_to_moodle.main
 from gh_md_to_moodle.main import _remove_newline_from_code
 from gh_md_to_moodle.main import main
 
@@ -140,8 +142,6 @@ def test_convert_md_contains(content, exp, tmpdir, md_dummy):
 )
 def test_remove_newline_from_code_tag(code, exp):
     new_code = _remove_newline_from_code(code)
-    print(code)
-    print(new_code)
     assert new_code == exp
 
 
@@ -152,3 +152,121 @@ def test_css_folder_is_not_created(tmpdir, md_dummy):
         main(args)
         contents = os.listdir(tmpdir)
         assert 'github-markdown-css' not in contents
+
+
+def test_single_img_with_link(tmpdir, md_dummy):
+    with tmpdir.as_cwd():
+        link = 'https://i.fluffy.cc/KT532NcD7QsGgd6zTXsbQsm6lX7sMrCD.png'
+        md_dummy(f'![alt_text]({link})')
+        args = ['testing.md', 'test.html']
+        main(args)
+        with open('test.html') as f:  # also checks that file exists
+            contents = f.read()
+        assert f'<a href="{link}" rel="nofollow" target="_blank">' in contents
+        assert (
+            f'<img alt="alt_text" data-canonical-src="{link}" src="{link}" '
+            'style="max-width:100%; max-height: 480px;"/>'
+        ) in contents
+
+
+def test_multiple_img_with_link(tmpdir, md_dummy):
+    with tmpdir.as_cwd():
+        link_a = 'https://i.fluffy.cc/KT532NcD7QsGgd6zTXsbQsm6lX7sMrCD.png'
+        link_b = 'https://i.fluffy.cc/9dgJNxvRbHXjlTvDM3cC74NTpkqqN468.png'
+        md_dummy(
+            f'![alt_text]({link_a})\n\n'
+            f'![alt_text]({link_b})',
+        )
+        args = ['testing.md', 'test.html']
+        main(args)
+        with open('test.html') as f:  # also checks that file exists
+            contents = f.read()
+
+        # first link
+        assert (
+            f'<a href="{link_a}" rel="nofollow" target="_blank">'
+        ) in contents
+        assert (
+            f'<img alt="alt_text" data-canonical-src="{link_a}" src="{link_a}"'
+            ' style="max-width:100%; max-height: 480px;"/>'
+        ) in contents
+
+        # second link
+        assert (
+            f'<a href="{link_b}" rel="nofollow" target="_blank">'
+        ) in contents
+        assert (
+            f'<img alt="alt_text" data-canonical-src="{link_b}" src="{link_b}"'
+            ' style="max-width:100%; max-height: 480px;"/>'
+        ) in contents
+
+
+def test_regular_links_are_not_converted(tmpdir, md_dummy):
+    with tmpdir.as_cwd():
+        link_a = 'https://i.fluffy.cc/KT532NcD7QsGgd6zTXsbQsm6lX7sMrCD.png'
+        link_b = 'https://i.fluffy.cc/9dgJNxvRbHXjlTvDM3cC74NTpkqqN468.png'
+        md_dummy(
+            f'[this is a link]({link_a})\n\n'
+            f'![alt_text]({link_b})',
+        )
+        args = ['testing.md', 'test.html']
+        main(args)
+        with open('test.html') as f:  # also checks that file exists
+            contents = f.read()
+
+        # regular link
+        assert f'<a href="{link_a}" rel="nofollow">this is a link</a>'
+
+        # image
+        assert (
+            f'<a href="{link_b}" rel="nofollow" target="_blank">'
+        ) in contents
+        assert (
+            f'<img alt="alt_text" data-canonical-src="{link_b}" src="{link_b}"'
+            ' style="max-width:100%; max-height: 480px;"/>'
+        ) in contents
+
+
+def test_local_imgs(tmpdir, md_dummy):
+    with tmpdir.as_cwd():
+        # mock an image file
+        img_dir = 'local/img'
+        os.makedirs(img_dir, exist_ok=True)
+        link = f'{img_dir}/test.png'
+        with open(link, 'w') as f:
+            f.write('foo')
+
+        md_dummy(f'![alt_text]({link})')
+        args = ['testing.md', 'test.html']
+        main(args)
+        with open('test.html') as f:  # also checks that file exists
+            contents = f.read()
+        assert (
+            f'<a href="{link}" rel="noopener noreferrer" target="_blank">'
+        ) in contents
+        assert (
+            f'<img alt="alt_text" data-canonical-src="{link}" src="{link}" '
+            'style="max-width:100%;"/>'
+        ) in contents
+
+
+def test_rate_limit_exceeded(tmpdir, md_dummy):
+    with tmpdir.as_cwd():
+        md_dummy('# test')
+        mock_return = (
+            '{"message":"API rate limit exceeded for 188.101.86.189. '
+            '(But here\'s the good news: Authenticated requests get a '
+            'higher rate limit. Check out the documentation for more '
+            'details.)","documentation_url":'
+            '"https://docs.github.com/rest/overview/resources-in-the-rest'
+            '-api#rate-limiting"}'
+        )
+        with mock.patch.object(
+            gh_md_to_moodle.main,
+            'BeautifulSoup',
+            return_value=mock_return,
+        ):
+            args = ['testing.md', 'test.html']
+            with pytest.raises(Exception) as exc:
+                main(args)
+        assert exc.value.args[0] == 'API limit exceeded. Wait a few minutes'
