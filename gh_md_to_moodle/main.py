@@ -67,7 +67,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # find img urls in markdown file
     with open(args.origin) as md:
         md_contents = md.read()
-    MD_IMG = re.compile(r'!\[\w+?\]\(([a-zA-Z:\/\.0-9]+)\)')
+    MD_IMG = re.compile(r'!\[(?:[\w\s\d]+)?\]\(([a-zA-Z:\/\.0-9\?&\-=]+)\)')
     img_urls = MD_IMG.findall(md_contents)
 
     # fin img tags in html

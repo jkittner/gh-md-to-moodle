@@ -154,9 +154,17 @@ def test_css_folder_is_not_created(tmpdir, md_dummy):
         assert 'github-markdown-css' not in contents
 
 
-def test_single_img_with_link(tmpdir, md_dummy):
+@pytest.mark.parametrize(
+    'link',
+    (
+        'https://i.fluffy.cc/KT532NcD7QsGgd6zTXsbQsm6lX7sMrCD.png',
+        'https://www.foo.bar',
+        'http://foo.bar',
+        'https://foo-bar.baz?test=foo&bar=wat',
+    ),
+)
+def test_single_img_with_link(tmpdir, md_dummy, link):
     with tmpdir.as_cwd():
-        link = 'https://i.fluffy.cc/KT532NcD7QsGgd6zTXsbQsm6lX7sMrCD.png'
         md_dummy(f'![alt_text]({link})')
         args = ['testing.md', 'test.html']
         main(args)
@@ -164,8 +172,7 @@ def test_single_img_with_link(tmpdir, md_dummy):
             contents = f.read()
         assert f'<a href="{link}" rel="nofollow" target="_blank">' in contents
         assert (
-            f'<img alt="alt_text" data-canonical-src="{link}" src="{link}" '
-            'style="max-width:100%; max-height: 480px;"/>'
+            f'<img alt="alt_text" data-canonical-src="{link}" src="{link}"'
         ) in contents
 
 
@@ -247,6 +254,30 @@ def test_local_imgs(tmpdir, md_dummy):
         assert (
             f'<img alt="alt_text" data-canonical-src="{link}" src="{link}" '
             'style="max-width:100%;"/>'
+        ) in contents
+
+
+@pytest.mark.parametrize(
+    'alt',
+    (
+        'foo',
+        'foo bar',
+        '',
+        'foo 123 bar',
+    ),
+)
+def test_single_img_with_link_no_alt(tmpdir, md_dummy, alt):
+    link = 'https://i.fluffy.cc/KT532NcD7QsGgd6zTXsbQsm6lX7sMrCD.png'
+    with tmpdir.as_cwd():
+        md_dummy(f'![{alt}]({link})')
+        args = ['testing.md', 'test.html']
+        main(args)
+        with open('test.html') as f:  # also checks that file exists
+            contents = f.read()
+        assert f'<a href="{link}" rel="nofollow" target="_blank">' in contents
+        assert (
+            f'<img alt="{alt}" data-canonical-src="{link}" src="{link}" '
+            'style="max-width:100%; max-height: 480px;"/>'
         ) in contents
 
 
