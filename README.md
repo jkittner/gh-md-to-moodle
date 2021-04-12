@@ -8,7 +8,7 @@ A tool to convert markdown to a `html` in GitHub style markdown.
 ## Installation
 
 ```console
-pip install git+https://github.com/theendlessriver13/gh-md-to-moodle.git@1.0.1
+pip install git+https://github.com/theendlessriver13/gh-md-to-moodle.git@master
 ```
 
 ## Usage
@@ -37,7 +37,3 @@ pip install git+https://github.com/theendlessriver13/gh-md-to-moodle.git@1.0.1
 - this tool uses the python package [gh-md-to-html](https://pypi.org/project/gh-md-to-html/) to convert the markdown to `html`
 - after this some JavaScript is added
   - the JavaScript appends another stylesheet to the loaded page and adds some inline css. This allows the page to render in GitHub styled markdown.
-
-## Not implemented yet
-
-- images are not supported yet

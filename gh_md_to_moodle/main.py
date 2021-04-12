@@ -45,7 +45,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # convert the markdown
     # pass this output to a temporary dir
     with tempfile.TemporaryDirectory() as tmpdir:
-        convert_md(md_origin=args.origin, destination=tmpdir, css_paths=tmpdir)
+        convert_md(
+            md_origin=args.origin,
+            destination=tmpdir,
+            css_paths=tmpdir,
+            enable_image_downloading=False,
+        )
         raw_html = os.path.join(
             tmpdir,
             re.sub(r'\.md$', '.html', os.path.basename(args.origin)),
@@ -64,25 +69,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if 'API rate limit exceeded' in soup:
         raise Exception('API limit exceeded. Wait a few minutes')
 
-    # find img urls in markdown file
-    with open(args.origin) as md:
-        md_contents = md.read()
-    MD_IMG = re.compile(r'!\[(?:[\w\s\d]+)?\]\(([a-zA-Z:\/\.0-9\?&\-=]+)\)')
-    img_urls = MD_IMG.findall(md_contents)
-
-    # fin img tags in html
-    imgs = soup.find_all('img')
-    old_urls = [i['src'] for i in imgs]
-
-    # check both are matched correctly
-    assert len(old_urls) == len(img_urls)
-
     # call code formatter
     pretty_html = soup.prettify()
     # remove newlines form code tag
     pretty_html = _remove_newline_from_code(pretty_html)
-    for img_url, old_url in zip(img_urls, old_urls):
-        pretty_html = pretty_html.replace(old_url, img_url)
 
     with open(args.destination, 'w') as f:
         f.write(pretty_html)
