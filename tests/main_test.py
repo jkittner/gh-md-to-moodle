@@ -160,7 +160,6 @@ def test_css_folder_is_not_created(tmpdir, md_dummy):
         'https://i.fluffy.cc/KT532NcD7QsGgd6zTXsbQsm6lX7sMrCD.png',
         'https://www.foo.bar',
         'http://foo.bar',
-        'https://foo-bar.baz?test=foo&amp;bar=wat',
     ),
 )
 def test_single_img_with_link(tmpdir, md_dummy, link):
@@ -173,6 +172,24 @@ def test_single_img_with_link(tmpdir, md_dummy, link):
         assert f'<a href="{link}" rel="nofollow" target="_blank">' in contents
         assert (
             f'<img alt="alt_text" data-canonical-src="{link}" src="{link}"'
+        ) in contents
+
+
+def test_img_link_with_arguments_is_escaped(tmpdir, md_dummy):
+    with tmpdir.as_cwd():
+        md_dummy(f'![alt_text]({"https://foo-bar.baz?test=foo&bar=wat"})')
+        args = ['testing.md', 'test.html']
+        main(args)
+        with open('test.html') as f:
+            contents = f.read()
+        assert (
+            '<a href="https://foo-bar.baz?test=foo&amp;bar=wat" '
+            'rel="nofollow" target="_blank">'
+        ) in contents
+        assert (
+            '<img alt="alt_text" '
+            'data-canonical-src="https://foo-bar.baz?test=foo&amp;bar=wat" '
+            'src="https://foo-bar.baz?test=foo&amp;bar=wat"'
         ) in contents
 
 
