@@ -169,7 +169,10 @@ def test_single_img_with_link(tmpdir, md_dummy, link):
         main(args)
         with open('test.html') as f:  # also checks that file exists
             contents = f.read()
-        assert f'<a href="{link}" rel="nofollow" target="_blank">' in contents
+        assert (
+            f'<a href="{link}" rel="noopener noreferrer nofollow" '
+            f'target="_blank">'
+        ) in contents
         assert (
             f'<img alt="alt_text" data-canonical-src="{link}" src="{link}"'
         ) in contents

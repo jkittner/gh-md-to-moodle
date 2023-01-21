@@ -1,6 +1,0 @@
-[report]
-fail_under = 100
-# non-runnable code
-exclude_lines =
-    ^if __name__ == ['"]__main__['"]:$
-    pragma: no cover
